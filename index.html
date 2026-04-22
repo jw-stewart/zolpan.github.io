@@ -3,15 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zolpan</title>
+    <title>GreenArtStew</title>
     <style>
-        /* 기본 스타일 초기화 및 배경 설정 */
+        /* 1. 커스텀 폰트 설정 (파일명과 경로가 정확해야 합니다) */
+        @font-face {
+            font-family: 'Galmuri11';
+            src: url('Galmuri11.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* 스크롤 바 제거 */
-            background-color: #101015; /* 어두운 밤하늘 같은 배경색 */
+            overflow: hidden;
+            background-color: #0a0a0c; /* 조금 더 깊은 블랙으로 변경 */
+        }
+
+        /* 2. 메인 텍스트 스타일 (화면 중앙 고정) */
+        .main-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100; /* 이미지보다 위에 오도록 설정 */
+            
+            font-family: 'Galmuri11', sans-serif;
+            font-size: 5rem; /* 글자 크기 (모바일은 아래 미디어 쿼리에서 조절) */
+            font-weight: bold;
+            color: #2ecc71; /* GreenArtStew에 어울리는 초록색 */
+            text-align: center;
+            white-space: nowrap;
+            
+            /* 픽셀 폰트의 매력을 살리는 네온 글로우 효과 */
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5),
+                         0 0 20px rgba(46, 204, 113, 0.3);
+            
+            user-select: none; /* 텍스트 드래그 방지 */
+            pointer-events: none; /* 텍스트가 마우스 이벤트를 방해하지 않게 */
         }
 
         /* 이미지가 돌아다닐 컨테이너 */
@@ -19,133 +49,105 @@
             width: 100%;
             height: 100%;
             position: relative;
+            z-index: 1;
         }
 
-        /* 돌아다니는 이미지의 공통 스타일 */
         .floater {
-            position: absolute; /* 절대 좌표 사용 */
-            pointer-events: none; /* 이미지가 마우스 클릭을 방해하지 않도록 */
-            /* 이미지 비율 유지를 위해 object-fit 사용 (필요시) */
-            object-fit: contain; 
-            /* 부드러운 움직임을 위해 hardware acceleration 힌트 제공 */
-            will-change: transform; 
+            position: absolute;
+            pointer-events: none;
+            will-change: transform;
+            opacity: 0.5; /* 텍스트 가독성을 위해 배경 이미지 투명도 살짝 낮춤 */
+        }
+
+        /* 모바일 대응: 화면이 작을 때는 글자 크기 축소 */
+        @media (max-width: 768px) {
+            .main-text {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="floater-container">
-        </div>
+    <div class="main-text">GreenArtStew</div>
+
+    <div id="floater-container"></div>
 
     <script>
-        // --- 설정 값 ---
         const container = document.getElementById('floater-container');
-        const numFloaters = 25; // 화면에 생성할 총 이미지 개수
-        const imgSrcs = ['bait.png', 'zol.png']; // 사용할 이미지 파일명 배열 (상대 경로)
-        const minSize = 60; // 이미지 최소 크기 (px)
-        const maxSize = 120; // 이미지 최대 크기 (px)
-        const minSpeed = 30; // 최소 속도 (px/second)
-        const maxSpeed = 100; // 최대 속도 (px/second)
+        const numFloaters = 20; // 텍스트 집중도를 위해 개수를 살짝 줄임
+        const imgSrcs = ['bait.png', 'zol.png'];
+        const minSize = 50;
+        const maxSize = 100;
+        const minSpeed = 20; 
+        const maxSpeed = 60; // 텍스트가 잘 보이도록 속도를 조금 더 늦춤
 
-        // 생성된 이미지 객체들을 담을 배열
         let floaters = [];
         let startTime = null;
 
-        // --- 함수 정의 ---
-
-        // 이미지 요소 생성 및 초기화 함수
         function initFloaters() {
             for (let i = 0; i < numFloaters; i++) {
                 const img = document.createElement('img');
-                const srcIndex = Math.floor(Math.random() * imgSrcs.length); // 이미지 랜덤 선택
+                const srcIndex = Math.floor(Math.random() * imgSrcs.length);
                 img.src = imgSrcs[srcIndex];
                 img.className = 'floater';
                 
-                // 랜덤한 크기, 초기 위치, 속도, 방향 설정
                 const size = Math.random() * (maxSize - minSize) + minSize;
                 const x = Math.random() * window.innerWidth;
                 const y = Math.random() * window.innerHeight;
-                const angle = Math.random() * Math.PI * 2; // 0 ~ 360도 랜덤 방향
+                const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
                 
-                // x, y축 속도 성분 계산
                 const vx = Math.cos(angle) * speed;
                 const vy = Math.sin(angle) * speed;
 
-                // 스타일 적용
                 img.style.width = size + 'px';
                 img.style.left = x + 'px';
                 img.style.top = y + 'px';
-                // 살짝 투명하게 만들어서 둥둥 떠다니는 느낌 강조
-                img.style.opacity = Math.random() * 0.4 + 0.2; 
 
-                // 화면에 추가
                 container.appendChild(img);
 
-                // 객체 정보 저장
                 floaters.push({
                     element: img,
                     x: x,
                     y: y,
                     vx: vx,
                     vy: vy,
-                    width: size,
-                    // 이미지의 실제 높이는 로드된 후에 알 수 있으므로, 초기에는 width와 같다고 가정하거나, 
-                    // 로드 완료 이벤트를 사용하여 정확히 가져오는 것이 좋습니다. 
-                    // 여기서는 간단하게 width 값을 기준으로 경계 처리를 합니다.
+                    width: size
                 });
             }
         }
 
-        // 애니메이션 프레임 업데이트 함수
         function animateFloaters(timestamp) {
             if (!startTime) startTime = timestamp;
-            const deltaTime = (timestamp - startTime) / 1000; // 이전 프레임과의 시간 차이 (초 단위)
+            const deltaTime = (timestamp - startTime) / 1000;
             startTime = timestamp;
 
             const winWidth = window.innerWidth;
             const winHeight = window.innerHeight;
 
             for (let floater of floaters) {
-                // 1. 위치 업데이트: x = x + (속도 * 시간)
                 floater.x += floater.vx * deltaTime;
                 floater.y += floater.vy * deltaTime;
 
-                // 2. 화면 경계 처리 (화면을 벗어나면 반대편에서 나타나도록 함)
-                // x축 경계
-                if (floater.x > winWidth) {
-                    floater.x = -floater.width; // 오른쪽 밖 -> 왼쪽 밖으로 이동
-                } else if (floater.x < -floater.width) {
-                    floater.x = winWidth; // 왼쪽 밖 -> 오른쪽 밖으로 이동
-                }
+                if (floater.x > winWidth) floater.x = -floater.width;
+                else if (floater.x < -floater.width) floater.x = winWidth;
 
-                // y축 경계
-                // 이미지 높이를 정확히 가져오기 위해 offsetHeight를 사용합니다.
-                const floaterHeight = floater.element.offsetHeight || floater.width; 
-                if (floater.y > winHeight) {
-                    floater.y = -floaterHeight; // 아래쪽 밖 -> 위쪽 밖으로 이동
-                } else if (floater.y < -floaterHeight) {
-                    floater.y = winHeight; // 위쪽 밖 -> 아래쪽 밖으로 이동
-                }
+                const floaterHeight = floater.element.offsetHeight || floater.width;
+                if (floater.y > winHeight) floater.y = -floaterHeight;
+                else if (floater.y < -floaterHeight) floater.y = winHeight;
 
-                // 3. 실제 DOM 요소의 CSS 위치 업데이트
                 floater.element.style.left = floater.x + 'px';
                 floater.element.style.top = floater.y + 'px';
             }
 
-            // 다음 프레임 요청
             requestAnimationFrame(animateFloaters);
         }
 
-        // --- 실행 ---
-        // 페이지 로딩이 완료되면 시작
         window.onload = function() {
-            initFloaters(); // 이미지 생성 및 초기화
-            requestAnimationFrame(animateFloaters); // 애니메이션 시작
+            initFloaters();
+            requestAnimationFrame(animateFloaters);
         };
-
-        // 창 크기가 조절될 때 경계 처리 로직이 계속 작동하도록 보장하기 위해, 
-        // 굳이 resize 이벤트를 잡지 않아도 animateFloaters 내의 winWidth/winHeight가 매 프레임 업데이트되므로 괜찮습니다.
     </script>
 </body>
 </html>
